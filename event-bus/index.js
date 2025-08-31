@@ -6,15 +6,24 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.post("/events", (req, res) => {
+app.post("/events", async (req, res) => {
   const event = req.body;
 
-  // Forward the event to the appropriate service
-  axios.post("http://localhost:4000/events", event);
-  axios.post("http://localhost:4001/events", event);
-  axios.post("http://localhost:4002/events", event);
+  try {
+    // Forward the event to the appropriate service
+    await axios.post("http://localhost:4000/events", event);
+    await axios.post("http://localhost:4001/events", event);
+    await axios.post("http://localhost:4002/events", event);
+  } catch (err) {
+    console.error("Error forwarding event:", err);
+  }
 
   res.send({ status: "OK" });
+});
+
+// global error handler
+app.use((err, req, res, next) => {
+  res.status(500).send({ error: "Something went wrong" });
 });
 
 app.listen(4005, () => {
