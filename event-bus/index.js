@@ -1,7 +1,22 @@
 const express = require("express");
-const bodyParser = require("bod-parser");
+const bodyParser = require("body-parser");
 const axios = require("axios");
 
 const app = express();
 
 app.use(bodyParser.json());
+
+app.post("/events", (req, res) => {
+  const event = req.body;
+
+  // Forward the event to the appropriate service
+  axios.post("http://localhost:4000/events", event);
+  axios.post("http://localhost:4001/events", event);
+  axios.post("http://localhost:4002/events", event);
+
+  res.send({ status: "OK" });
+});
+
+app.listen(4005, () => {
+  console.log("Event bus listening on port 4005");
+});
