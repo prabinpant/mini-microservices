@@ -43,10 +43,32 @@ app.post("/posts/:id/comments", async (req, res) => {
   }
 });
 
-app.post("/events", (req, res) => {
-  const { type, data } = req.body;
+app.post("/events", async (req, res) => {
+  try {
+    const { type, data: updatedCommentData } = req.body;
 
-  res.send({});
+    if (type === "CommentModerated") {
+      const { id: commentId, postId } = updatedCommentData;
+      console.log("updatedCommentData :", updatedCommentData);
+
+      console.log("commentsByPostId[postId] :", commentsByPostId[postId]);
+      const comment = commentsByPostId[postId].find(
+        (comment) => comment.id === commentId
+      );
+
+      comment = { ...comment, ...updatedCommentData };
+
+      await axios.post("http://localhost:4005/events", {
+        type: "CommentUpdated",
+        data: updatedCommentData,
+      });
+    }
+
+    res.send({});
+  } catch (error) {
+    console.error("Error handling event:", error);
+    res.status(500).send({ error: "Failed to process event" });
+  }
 });
 
 app.listen(4001, () => {

@@ -9,6 +9,8 @@ app.post("/events", async (req, res) => {
   try {
     const { type, data: commentData } = req.body;
 
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+
     if (type === "CommentCreated") {
       const status = commentData.content.includes("orange")
         ? "rejected"
