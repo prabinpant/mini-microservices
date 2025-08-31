@@ -6,8 +6,12 @@ const app = express();
 
 app.use(bodyParser.json());
 
+const events = [];
+
 app.post("/events", async (req, res) => {
   const event = req.body;
+
+  events.push(event);
 
   try {
     // Forward the event to the appropriate service
@@ -20,6 +24,10 @@ app.post("/events", async (req, res) => {
   }
 
   res.send({ status: "OK" });
+});
+
+app.get("/events", (req, res) => {
+  res.send(events);
 });
 
 // global error handler
