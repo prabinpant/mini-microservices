@@ -15,38 +15,36 @@ app.get("/posts/:id/comments", (req, res) => {
 });
 
 app.post("/posts/:id/comments", async (req, res) => {
-  const commentId = randomBytes(4).toString("hex");
-  const { content } = req.body;
+  try {
+    const commentId = randomBytes(4).toString("hex");
+    const { content } = req.body;
+    const status = "pending";
 
-  const comments = commentsByPostId[req.params.id] || [];
+    const comments = commentsByPostId[req.params.id] || [];
 
-  comments.push({ id: commentId, content });
+    const newComment = { id: commentId, content, status };
 
-  commentsByPostId[req.params.id] = comments;
+    comments.push(newComment);
 
-  await axios.post("http://localhost:4005/events", {
-    type: "CommentCreated",
-    data: {
-      id: commentId,
-      content,
-      postId: req.params.id,
-    },
-  });
+    commentsByPostId[req.params.id] = comments;
 
-  res.status(201).send(comments);
+    await axios.post("http://localhost:4005/events", {
+      type: "CommentCreated",
+      data: {
+        ...newComment,
+        postId: req.params.id,
+      },
+    });
+
+    res.status(201).send(comments);
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    res.status(500).send({ error: "Failed to create comment" });
+  }
 });
 
 app.post("/events", (req, res) => {
   const { type, data } = req.body;
-  console.log("Event received:", type);
-
-  switch (type) {
-    case "CommentCreated":
-      // Handle the CommentCreated event
-      break;
-    default:
-      break;
-  }
 
   res.send({});
 });
